@@ -1,15 +1,19 @@
+import { useState } from 'react';
 import { Video, Wand2, Users, LayoutTemplate, Play, Sparkles } from 'lucide-react';
 import { MOCK_HISTORY, MOCK_CHARACTERS } from '../data';
 import { ViewState } from '../types';
 
 interface DashboardProps {
-  onNavigate: (view: ViewState) => void;
+  onNavigate: (view: ViewState, aiPrompt?: string) => void;
+  store?: any;
 }
 
-export function Dashboard({ onNavigate }: DashboardProps) {
+export function Dashboard({ onNavigate, store }: DashboardProps) {
+  const [prompt, setPrompt] = useState("");
+
   const stats = [
-    { label: 'Vídeos Criados', value: '142', icon: Video, color: 'text-indigo-500', bg: 'bg-indigo-100' },
-    { label: 'Atores Virtuais', value: MOCK_CHARACTERS.length.toString(), icon: Users, color: 'text-rose-500', bg: 'bg-rose-100' },
+    { label: 'Vídeos Criados', value: store?.history?.length.toString() || '0', icon: Video, color: 'text-indigo-500', bg: 'bg-indigo-100' },
+    { label: 'Atores Virtuais', value: store?.characters?.length.toString() || '0', icon: Users, color: 'text-rose-500', bg: 'bg-rose-100' },
     { label: 'Cenas e Templates', value: '18', icon: LayoutTemplate, color: 'text-emerald-500', bg: 'bg-emerald-100' },
   ];
 
@@ -28,17 +32,29 @@ export function Dashboard({ onNavigate }: DashboardProps) {
               <h2 className="text-2xl font-bold">IA Diretora</h2>
             </div>
             
-            <p className="text-indigo-100 text-lg mb-4">O que você deseja criar?</p>
+            <p className="text-indigo-100 text-lg mb-4">O que você deseja anunciar?</p>
             
             <div className="flex items-center gap-3 bg-white/10 p-2 rounded-2xl backdrop-blur-md border border-white/20">
               <input 
                 type="text" 
-                placeholder="Ex: Crie uma propaganda anunciando telha colonial com o mascote João..."
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Ex: Crie uma propaganda anunciando telha colonial..."
                 className="flex-1 bg-transparent border-none text-white placeholder:text-indigo-200 px-4 py-3 focus:outline-none focus:ring-0 text-lg"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && prompt.trim()) {
+                    onNavigate('create', prompt);
+                  }
+                }}
               />
               <button 
-                onClick={() => onNavigate('create')}
-                className="bg-white text-indigo-600 px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-indigo-50 hover:scale-105 transition-all shadow-sm"
+                onClick={() => {
+                  if (prompt.trim()) {
+                    onNavigate('create', prompt);
+                  }
+                }}
+                className="bg-white text-indigo-600 px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-indigo-50 hover:scale-105 transition-all shadow-sm disabled:opacity-50 disabled:hover:scale-100"
+                disabled={!prompt.trim()}
               >
                 Gerar com IA
               </button>

@@ -1,14 +1,17 @@
 import { useState } from 'react';
-import { Plus, MoreHorizontal, MessageSquare, Footprints, User, BrainCircuit, Mic, Smile, Palette, Package, Activity, Navigation, LogIn, PartyPopper } from 'lucide-react';
+import { Plus, MoreHorizontal, MessageSquare, Footprints, User, BrainCircuit, Mic, Smile, Palette, Package, Activity, Navigation, LogIn, PartyPopper, Users } from 'lucide-react';
 import { MOCK_CHARACTERS } from '../data';
 import { ViewState } from '../types';
 
 interface CharactersProps {
   onNavigate: (view: ViewState) => void;
+  store?: any;
 }
 
-export function Characters({ onNavigate }: CharactersProps) {
+export function Characters({ onNavigate, store }: CharactersProps) {
   const [selectedChar, setSelectedChar] = useState<string | null>(null);
+  
+  const characters = store?.characters || MOCK_CHARACTERS;
 
   const quickActions = [
     { label: 'Falar', icon: MessageSquare },
@@ -35,7 +38,7 @@ export function Characters({ onNavigate }: CharactersProps) {
       <div className="flex gap-8 flex-1 min-h-0">
         {/* Character List */}
         <div className="w-1/3 min-w-[320px] overflow-y-auto pr-2 space-y-4">
-          {MOCK_CHARACTERS.map(char => (
+          {characters.map((char: any) => (
             <div 
               key={char.id} 
               onClick={() => setSelectedChar(char.id)}
@@ -61,7 +64,7 @@ export function Characters({ onNavigate }: CharactersProps) {
         {/* Selected Character Detail & Memory Dashboard */}
         <div className="flex-1 bg-white border border-slate-200 rounded-2xl overflow-y-auto">
           {selectedChar ? (() => {
-            const char = MOCK_CHARACTERS.find(c => c.id === selectedChar)!;
+            const char = characters.find((c: any) => c.id === selectedChar)!;
             return (
               <div className="p-8">
                 <div className="flex items-start gap-6 border-b border-slate-100 pb-8 mb-8">

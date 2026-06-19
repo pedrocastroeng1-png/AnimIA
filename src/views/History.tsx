@@ -1,7 +1,9 @@
 import { Download, Play, MoreHorizontal, Copy } from 'lucide-react';
-import { MOCK_HISTORY } from '../data';
+import { VideoHistory } from '../types';
 
-export function History() {
+export function HistoryView({ store }: { store: any }) {
+  const { history } = store;
+  
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
       <div>
@@ -20,7 +22,7 @@ export function History() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
-            {MOCK_HISTORY.map(video => (
+            {history.map((video: VideoHistory) => (
               <tr key={video.id} className="hover:bg-slate-50/50 transition-colors group">
                 <td className="py-4 px-6">
                   <div className="flex items-center gap-4">
