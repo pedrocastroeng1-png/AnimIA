@@ -29,7 +29,7 @@ async function startServer() {
         model: "gemini-3.1-pro-preview",
         contents: `Crie um roteiro publicitário engajador, direto e persuasivo de 15 a 30 segundos baseado nesta ideia: "${prompt}".
         
-        O personagem usado é: "${characterData?.name || 'Mascote Genérico'}" (Estilo: ${characterData?.speakingStyle || 'Animado'})
+        O personagem usado é: "${characterData?.name || 'Mascote Genérico'}" (Personalidade: ${characterData?.personality || 'Comercial/Vendedor'})
         O cenário usado é: "${backgroundData?.name || 'Loja'}"
         
         Siga estas regras restritas:

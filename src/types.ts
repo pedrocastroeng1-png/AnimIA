@@ -1,4 +1,5 @@
-export type ViewState = 'dashboard' | 'create' | 'characters' | 'backgrounds' | 'history' | 'behaviors' | 'scenes' | 'templates';
+export type AppState = 'home' | 'create_mascot' | 'workspace';
+export type WorkspaceView = 'scenes' | 'backgrounds' | 'products' | 'vehicles' | 'scripts' | 'director' | 'projects' | 'settings';
 
 export interface Character {
   id: string;
@@ -11,6 +12,8 @@ export interface Character {
   favoriteBehaviors?: string[];
   frequentObjects?: string[];
   favoriteScenes?: string[];
+  description?: string;
+  personality?: string;
 }
 
 export interface Background {
@@ -32,6 +35,7 @@ export interface Scene {
   name: string;
   backgroundId: string;
   description: string;
+  characterId?: string;
 }
 
 export interface Template {
