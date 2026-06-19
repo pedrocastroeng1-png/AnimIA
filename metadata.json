@@ -1,0 +1,8 @@
+{
+  "name": "Gerador de Animações IA",
+  "description": "Plataforma premium para criar vídeos publicitários utilizando mascotes, personagens e avatares animados por inteligência artificial.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
