@@ -20,123 +20,365 @@ const EXPRESSIONS = [
   { id: 'surpreso', label: 'Surpreso', emoji: '😮' },
 ];
 
-const SimulatedMascot = ({ expression, isSpeaking, baseColor = "#4f46e5", name, category, emoji, referenceUrl }: any) => {
-  // Define states
-  let leftArm = "M 30,60 L 15,80"; 
-  let rightArm = "M 70,60 L 85,80";
-  let eyes = <><circle cx="35" cy="45" r="4" fill="#1e293b" /><circle cx="65" cy="45" r="4" fill="#1e293b" /></>;
-  let mouth = <path d="M 40,60 Q 50,65 60,60" fill="transparent" stroke="#1e293b" strokeWidth="3" strokeLinecap="round" />;
-  let bodyTransform = "translate(0, 0)";
+const ACTIONS = [
+  { id: 'entrar', label: 'Entrar em cena', emoji: '🚶' },
+  { id: 'sair', label: 'Sair de cena', emoji: '🏃' },
+  { id: 'caminhar', label: 'Caminhar', emoji: '🚶‍♂️' },
+  { id: 'acenar', label: 'Acenar', emoji: '👋' },
+  { id: 'apontar', label: 'Apontar', emoji: '👉' },
+  { id: 'produto', label: 'Mostrar produto', emoji: '📦' },
+  { id: 'preco', label: 'Mostrar preço', emoji: '💲' },
+  { id: 'whatsapp', label: 'Mostrar WhatsApp', emoji: '💬' },
+  { id: 'apresentar', label: 'Apresentar empresa', emoji: '🏢' },
+  { id: 'chamar', label: 'Chamar cliente', emoji: '🗣️' },
+  { id: 'entrega', label: 'Fazer entrega', emoji: '🚚' },
+  { id: 'entrar_veiculo', label: 'Entrar em veículo', emoji: '🚗' },
+  { id: 'sair_veiculo', label: 'Sair de veículo', emoji: '🚪' },
+];
+
+const SimulatedMascot = ({ expression, action, isSpeaking, name, category, emoji, referenceUrl }: any) => {
+  const imageUrl = referenceUrl || 'https://images.unsplash.com/photo-1579548122080-c35fd6820ceb?auto=format&fit=crop&q=80&w=600&h=600';
   
-  if (expression === 'feliz') {
-     mouth = <path d="M 35,55 Q 50,75 65,55" fill="transparent" stroke="#1e293b" strokeWidth="4" strokeLinecap="round" />;
-     leftArm = "M 30,60 Q 20,70 15,60";
-     rightArm = "M 70,60 Q 80,70 85,60";
-  } else if (expression === 'acenando') {
-     rightArm = "M 70,55 Q 85,30 95,20"; // Up and curved
-     mouth = <path d="M 40,60 Q 50,70 60,60" fill="transparent" stroke="#1e293b" strokeWidth="3" strokeLinecap="round" />;
-  } else if (expression === 'falando') {
-     mouth = isSpeaking 
-       ? <ellipse cx="50" cy="65" rx="6" ry="10" fill="#1e293b" />
-       : <path d="M 40,60 Q 50,65 60,60" fill="transparent" stroke="#1e293b" strokeWidth="3" strokeLinecap="round" />;
-     leftArm = isSpeaking ? "M 30,55 Q 15,45 10,40" : "M 30,60 L 15,80";
-  } else if (expression === 'comemorando') {
-     leftArm = "M 30,50 Q 15,20 10,15";
-     rightArm = "M 70,50 Q 85,20 90,15";
-     mouth = <path d="M 35,55 Q 50,80 65,55 Z" fill="#1e293b" />; // Open smile
-     eyes = <><path d="M 30,45 Q 35,40 40,45" fill="transparent" stroke="#1e293b" strokeWidth="3" strokeLinecap="round" /><path d="M 60,45 Q 65,40 70,45" fill="transparent" stroke="#1e293b" strokeWidth="3" strokeLinecap="round" /></>; // Happy eyes
-     bodyTransform = "translate(0, -10)";
-  } else if (expression === 'apontando') {
-     rightArm = "M 70,60 L 98,60";
-     bodyTransform = "translate(-5, 0) rotate(-5 50 50)"; // Leaning slightly
-  } else if (expression === 'pensativo') {
-     rightArm = "M 70,60 Q 60,75 50,68"; // Hand to chin
-     eyes = <><circle cx="35" cy="45" r="4" fill="#1e293b" /><line x1="30" y1="38" x2="40" y2="40" stroke="#1e293b" strokeWidth="2" strokeLinecap="round" /><circle cx="65" cy="45" r="4" fill="#1e293b" /><line x1="60" y1="40" x2="70" y2="38" stroke="#1e293b" strokeWidth="2" strokeLinecap="round" /></>; // Eyebrows down
-     mouth = <line x1="45" y1="65" x2="55" y2="65" stroke="#1e293b" strokeWidth="3" strokeLinecap="round" />;
-  } else if (expression === 'surpreso') {
-     eyes = <><circle cx="35" cy="43" r="5" fill="#1e293b" /><circle cx="65" cy="43" r="5" fill="#1e293b" /></>; // Big eyes
-     mouth = <circle cx="50" cy="65" r="5" fill="#1e293b" />; // O shape
-     leftArm = "M 30,60 Q 20,40 25,35";
-     rightArm = "M 70,60 Q 80,40 75,35";
-  }
+  // Decide how the mascot animates based on action OR expression
+  const isActionState = !!action;
+  
+  const getScale = () => {
+    if (isActionState) {
+      if (action === 'entrar') return [0, 1.2, 1];
+      if (action === 'sair') return [1, 1.2, 0];
+      return 1;
+    }
+    return expression === 'surpreso' ? 1.15 : expression === 'comemorando' ? [1, 1.1, 1] : 1;
+  };
 
-  // Generate some CSS keyframes string
-  const breathingAnim = isSpeaking ? "speakBounce 0.3s infinite alternate" : "breathe 1.5s infinite alternate ease-in-out";
+  const getRotate = () => {
+    if (isActionState) {
+      if (action === 'caminhar') return [-5, 5, -5];
+      if (action === 'acenar') return [-5, 5, -5];
+      if (action === 'apontar') return -5;
+      return 0;
+    }
+    return expression === 'acenando' ? [-5, 5, -5] : expression === 'pensativo' ? 3 : expression === 'apontando' ? -5 : 0;
+  };
 
+  const getY = () => {
+    if (isActionState) {
+      if (action === 'caminhar') return [0, -10, 0];
+      if (action === 'entrar' || action === 'sair') return 0;
+      return 0;
+    }
+    return expression === 'feliz' || expression === 'comemorando' ? [-10, 10, -10] : isSpeaking ? [-3, 3, -3] : 0;
+  };
+
+  const getX = () => {
+    if (isActionState) {
+      if (action === 'entrar') return [-200, 0];
+      if (action === 'sair') return [0, 200];
+      return 0;
+    }
+    return 0;
+  };
+
+  const getOpacity = () => {
+    if (isActionState) {
+      if (action === 'entrar') return [0, 1];
+      if (action === 'sair') return [1, 0];
+      return 1;
+    }
+    return 1;
+  };
+
+  const getTransition = () => {
+    if (isActionState) {
+      if (action === 'caminhar' || action === 'acenar') return { repeat: Infinity, duration: 0.6 };
+      if (action === 'entrar' || action === 'sair') return { duration: 0.8, ease: "backOut" };
+      return { duration: 0.5 };
+    }
+    return {
+      repeat: expression === 'acenando' || expression === 'feliz' || expression === 'comemorando' || isSpeaking ? Infinity : 0,
+      duration: expression === 'comemorando' ? 0.6 : isSpeaking ? 0.2 : 1.5,
+      ease: "easeInOut"
+    };
+  };
+  
   return (
     <div className="aspect-square bg-slate-100/50 rounded-3xl overflow-hidden border-2 border-slate-200 shadow-inner relative flex items-center justify-center">
-      <style>{`
-        @keyframes breathe {
-          from { transform: translateY(0px); }
-          to { transform: translateY(5px); }
-        }
-        @keyframes speakBounce {
-          from { transform: translateY(0px) scale(1); }
-          to { transform: translateY(3px) scale(1.02); }
-        }
-      `}</style>
-
       {/* Background radial gradient */}
       <div className="absolute inset-0 bg-gradient-to-tr from-indigo-100/40 to-transparent"></div>
 
       <div className="absolute top-4 left-4 bg-white/90 px-3 py-1.5 rounded-xl text-[10px] font-black text-indigo-700 backdrop-blur shadow-sm z-20 flex items-center gap-1.5 border border-indigo-100">
         <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></div>
-        RIG 3D SIMULADO
+        RIG. 2D SIMULADO (PROTÓTIPO)
       </div>
       
-      <div className="absolute inset-0 flex items-center justify-center z-10 p-8">
-        <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-2xl max-w-[280px]" style={{ overflow: 'visible' }}>
-          <g style={{ animation: breathingAnim, transformOrigin: '50% 50%' }}>
-            <g transform={bodyTransform} style={{ transition: 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' }}>
-              {/* Arms */}
-              <path d={leftArm} stroke={baseColor} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" fill="none" style={{ transition: 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' }} />
-              <path d={rightArm} stroke={baseColor} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" fill="none" style={{ transition: 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' }} />
-              
-              {/* Body */}
-              <rect x="20" y="20" width="60" height="65" rx="25" fill={baseColor} />
-              {/* Inner face area */}
-              <rect x="25" y="25" width="50" height="55" rx="20" fill="#ffffff" />
+      {/* Base Mascot Image with Transforms */}
+      <motion.div 
+        key={`mascot-${isActionState ? action : expression}`}
+        className="absolute inset-0 z-10 flex items-center justify-center"
+        animate={{
+          scale: getScale(),
+          rotate: getRotate(),
+          y: getY(),
+          x: getX(),
+          opacity: getOpacity(),
+          filter: !isActionState ? (expression === 'pensativo' ? 'sepia(0.2) brightness(0.95)' : expression === 'feliz' ? 'saturate(1.2)' : 'sepia(0) brightness(1)') : 'sepia(0) brightness(1)'
+        }}
+        transition={getTransition()}
+        style={{ transformOrigin: (!isActionState && expression === 'acenando') || (isActionState && action === 'acenar') ? 'bottom center' : 'center center' }}
+      >
+        <img src={imageUrl} alt="Mascote" className="w-full h-full object-contain drop-shadow-xl p-8" />
+      </motion.div>
 
-              {/* Face Container */}
-              <g style={{ transition: 'all 0.3s ease' }}>
-                {eyes}
-                {mouth}
-              </g>
-            </g>
-          </g>
-        </svg>
-      </div>
+      {/* Visual Props / Overlays based on expression/action */}
+      <AnimatePresence>
+        {!isActionState && expression === 'falando' && (
+           <motion.div 
+             initial={{ opacity: 0, scale: 0.5 }}
+             animate={{ opacity: 1, scale: 1 }}
+             exit={{ opacity: 0, scale: 0.5 }}
+             className="absolute md:top-1/4 md:right-1/4 top-10 right-10 z-20 bg-white p-4 rounded-3xl rounded-bl-sm shadow-xl font-bold text-slate-800 border-2 border-slate-200"
+           >
+             {isSpeaking ? (
+                <div className="flex gap-1.5">
+                  <div className="w-2.5 h-2.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2.5 h-2.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2.5 h-2.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                </div>
+             ) : (
+               <div className="text-xl px-1">💬</div>
+             )}
+           </motion.div>
+        )}
 
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/80 via-slate-900/40 to-transparent p-6 pt-12 z-20">
+        {!isActionState && expression === 'pensativo' && (
+           <motion.div 
+             initial={{ opacity: 0, y: 10 }}
+             animate={{ opacity: 1, y: 0 }}
+             exit={{ opacity: 0, y: 10 }}
+             className="absolute top-1/4 right-1/4 z-20 text-6xl drop-shadow-2xl"
+           >
+             <motion.div animate={{ rotate: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 2 }}>
+               🤔
+             </motion.div>
+           </motion.div>
+        )}
+
+        {!isActionState && expression === 'acenando' && (
+           <motion.div 
+             initial={{ opacity: 0, x: -20, rotate: -45 }}
+             animate={{ opacity: 1, x: 0, rotate: 0 }}
+             exit={{ opacity: 0, x: -20, rotate: -45 }}
+             className="absolute bottom-1/4 left-8 z-20 text-7xl drop-shadow-2xl origin-bottom-right"
+           >
+             <motion.div
+               animate={{ rotate: [0, 20, 0, 20, 0] }}
+               transition={{ repeat: Infinity, duration: 1.5 }}
+             >
+               👋
+             </motion.div>
+           </motion.div>
+        )}
+
+        {!isActionState && expression === 'comemorando' && (
+           <motion.div 
+             initial={{ opacity: 0, scale: 0 }}
+             animate={{ opacity: 1, scale: 1 }}
+             exit={{ opacity: 0, scale: 0 }}
+             className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center overflow-hidden"
+           >
+             <div className="absolute top-10 left-10 text-5xl animate-bounce">🎉</div>
+             <div className="absolute top-20 right-10 text-4xl animate-bounce" style={{ animationDelay: '200ms' }}>✨</div>
+             <div className="absolute bottom-32 left-20 text-5xl animate-bounce" style={{ animationDelay: '400ms' }}>🎊</div>
+             <div className="absolute bottom-20 right-20 text-6xl animate-bounce" style={{ animationDelay: '600ms' }}>🎈</div>
+           </motion.div>
+        )}
+
+        {!isActionState && expression === 'apontando' && (
+           <motion.div 
+             initial={{ opacity: 0, x: -20 }}
+             animate={{ opacity: 1, x: 0 }}
+             exit={{ opacity: 0, x: -20 }}
+             className="absolute md:top-1/2 right-12 z-20 text-7xl drop-shadow-2xl origin-left"
+             style={{ y: '-50%' }}
+           >
+             <motion.div
+               animate={{ x: [0, 15, 0] }}
+               transition={{ repeat: Infinity, duration: 1 }}
+             >
+               👉
+             </motion.div>
+           </motion.div>
+        )}
+
+        {!isActionState && expression === 'surpreso' && (
+           <motion.div 
+             initial={{ opacity: 0, scale: 2 }}
+             animate={{ opacity: 1, scale: 1 }}
+             exit={{ opacity: 0, scale: 0 }}
+             className="absolute top-1/4 left-1/2 z-20 text-7xl drop-shadow-2xl -translate-x-1/2"
+           >
+             <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 0.5 }}>
+               ❕
+             </motion.div>
+           </motion.div>
+        )}
+
+        {!isActionState && expression === 'feliz' && (
+           <motion.div 
+             initial={{ opacity: 0, scale: 0.5 }}
+             animate={{ opacity: 1, scale: 1 }}
+             exit={{ opacity: 0, scale: 0.5 }}
+             className="absolute top-1/4 right-1/4 z-20 text-5xl drop-shadow-2xl"
+           >
+             <motion.div
+               animate={{ scale: [1, 1.3, 1], rotate: [-15, 15, -15] }}
+               transition={{ repeat: Infinity, duration: 2 }}
+             >
+               ✨
+             </motion.div>
+           </motion.div>
+        )}
+
+        {/* --- ACTION OVERLAYS --- */}
+        {isActionState && action === 'produto' && (
+           <motion.div 
+             initial={{ opacity: 0, scale: 0.5, y: 20 }}
+             animate={{ opacity: 1, scale: 1, y: 0 }}
+             exit={{ opacity: 0, scale: 0.5 }}
+             className="absolute bottom-1/4 right-8 z-20 text-7xl drop-shadow-2xl"
+           >
+             <motion.div animate={{ y: [-5, 5, -5] }} transition={{ repeat: Infinity, duration: 2 }}>📦</motion.div>
+           </motion.div>
+        )}
+
+        {isActionState && action === 'preco' && (
+           <motion.div 
+             initial={{ opacity: 0, scale: 0.5, y: -20 }}
+             animate={{ opacity: 1, scale: 1, y: 0 }}
+             exit={{ opacity: 0, scale: 0.5 }}
+             className="absolute top-1/4 right-12 z-20 text-7xl drop-shadow-2xl"
+           >
+             <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}>💲</motion.div>
+           </motion.div>
+        )}
+
+        {isActionState && action === 'whatsapp' && (
+           <motion.div 
+             initial={{ opacity: 0, scale: 0 }}
+             animate={{ opacity: 1, scale: 1 }}
+             exit={{ opacity: 0, scale: 0 }}
+             className="absolute top-1/4 left-12 z-20 text-7xl drop-shadow-xl"
+           >
+             <motion.div animate={{ rotate: [-10, 10, -10] }} transition={{ repeat: Infinity, duration: 2 }}>💬</motion.div>
+           </motion.div>
+        )}
+
+        {isActionState && action === 'apresentar' && (
+           <motion.div 
+             initial={{ opacity: 0, scale: 0 }}
+             animate={{ opacity: 1, scale: 1 }}
+             exit={{ opacity: 0, scale: 0 }}
+             className="absolute top-1/4 right-12 z-20 text-6xl drop-shadow-xl"
+           >
+             🏢
+           </motion.div>
+        )}
+
+        {isActionState && action === 'chamar' && (
+           <motion.div 
+             initial={{ opacity: 0, x: 20 }}
+             animate={{ opacity: 1, x: 0 }}
+             exit={{ opacity: 0, x: 20 }}
+             className="absolute md:top-1/2 left-8 z-20 text-6xl drop-shadow-2xl"
+             style={{ y: '-50%' }}
+           >
+             <motion.div animate={{ x: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 1 }}>🗣️</motion.div>
+           </motion.div>
+        )}
+
+        {isActionState && action === 'entrega' && (
+           <motion.div 
+             initial={{ opacity: 0, x: -100 }}
+             animate={{ opacity: 1, x: 0 }}
+             exit={{ opacity: 0, x: 100 }}
+             className="absolute bottom-6 left-6 z-20 text-7xl drop-shadow-2xl"
+           >
+             <motion.div animate={{ x: [0, 20, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>🚚</motion.div>
+           </motion.div>
+        )}
+
+        {isActionState && action === 'entrar_veiculo' && (
+           <motion.div 
+             initial={{ opacity: 0, scale: 0.8 }}
+             animate={{ opacity: 1, scale: 1 }}
+             exit={{ opacity: 0, scale: 0.8 }}
+             className="absolute top-1/3 left-6 z-20 text-7xl drop-shadow-2xl"
+           >
+             🚗
+           </motion.div>
+        )}
+
+        {isActionState && action === 'sair_veiculo' && (
+           <motion.div 
+             initial={{ opacity: 0, scale: 0.8 }}
+             animate={{ opacity: 1, scale: 1 }}
+             exit={{ opacity: 0, scale: 0.8 }}
+             className="absolute top-1/3 right-6 z-20 text-7xl drop-shadow-2xl"
+           >
+             🚪
+           </motion.div>
+        )}
+
+        {isActionState && action === 'apontar' && (
+           <motion.div 
+             initial={{ opacity: 0, x: -20 }}
+             animate={{ opacity: 1, x: 0 }}
+             exit={{ opacity: 0, x: -20 }}
+             className="absolute md:top-1/2 right-12 z-20 text-7xl drop-shadow-2xl origin-left"
+             style={{ y: '-50%' }}
+           >
+             <motion.div
+               animate={{ x: [0, 15, 0] }}
+               transition={{ repeat: Infinity, duration: 1 }}
+             >
+               👉
+             </motion.div>
+           </motion.div>
+        )}
+
+        {isActionState && action === 'acenar' && (
+           <motion.div 
+             initial={{ opacity: 0, x: -20, rotate: -45 }}
+             animate={{ opacity: 1, x: 0, rotate: 0 }}
+             exit={{ opacity: 0, x: -20, rotate: -45 }}
+             className="absolute bottom-1/4 left-8 z-20 text-7xl drop-shadow-2xl origin-bottom-right"
+           >
+             <motion.div
+               animate={{ rotate: [0, 20, 0, 20, 0] }}
+               transition={{ repeat: Infinity, duration: 1.5 }}
+             >
+               👋
+             </motion.div>
+           </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-transparent p-6 pt-16 z-20 pointer-events-none">
          <h3 className="text-2xl font-black text-white drop-shadow-lg">{name || 'Mascote'}</h3>
-         <p className="text-white/90 font-medium text-sm flex items-center gap-2 drop-shadow-lg">
+         <p className="text-white/90 font-bold text-sm tracking-wide uppercase drop-shadow-lg opacity-80 mt-1">
            {category}
          </p>
       </div>
 
-      {referenceUrl && (
-        <div className="absolute bottom-6 right-6 w-16 h-16 rounded-xl border-2 border-white shadow-xl overflow-hidden bg-white z-20" title="Imagem Base">
-          <img src={referenceUrl} alt="Ref" className="w-full h-full object-cover" />
-        </div>
-      )}
-      
-      {!referenceUrl && (
-         <motion.div
-           key={`emoji-${expression}`}
-           initial={{ opacity: 0, scale: 0 }}
-           animate={{ opacity: 1, scale: 1 }}
-           className="absolute bottom-6 right-6 bg-white shadow-xl rounded-full w-14 h-14 flex items-center justify-center text-3xl border border-slate-200 z-20"
-         >
-           {emoji}
-         </motion.div>
-      )}
     </div>
   );
 }
 
 export function CreateMascot({ onFinish, onCancel }: CreateMascotProps) {
   const [step, setStep] = useState<Step>('input');
+  const [activeTab, setActiveTab] = useState<'expressoes' | 'acoes'>('expressoes');
   const [activeExpression, setActiveExpression] = useState('feliz');
+  const [activeAction, setActiveAction] = useState<string | null>(null);
   
   // Audio Simulator State
   const [speakText, setSpeakText] = useState("");
@@ -468,41 +710,92 @@ export function CreateMascot({ onFinish, onCancel }: CreateMascotProps) {
                   <div className="md:col-span-2 space-y-6">
                     <SimulatedMascot 
                       expression={activeExpression} 
+                      action={activeAction}
                       isSpeaking={isSpeaking} 
                       name={name} 
                       category={generatedData?.category || 'Mascote'} 
-                      emoji={EXPRESSIONS.find(e => e.id === activeExpression)?.emoji} 
+                      emoji={
+                        activeTab === 'acoes' && activeAction 
+                          ? ACTIONS.find(a => a.id === activeAction)?.emoji 
+                          : EXPRESSIONS.find(e => e.id === activeExpression)?.emoji
+                      } 
                       referenceUrl={mainImage?.url}
                     />
 
                     <div>
-                      <h4 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3">Expressões Geradas</h4>
-                      <div className="grid grid-cols-4 gap-2">
-                        {EXPRESSIONS.map((exp, i) => {
-                           const isActive = activeExpression === exp.id;
-                           return (
-                             <button 
-                               key={exp.id} 
-                               onClick={() => setActiveExpression(exp.id)}
-                               className={`relative aspect-square flex flex-col items-center justify-center rounded-xl transition-all group overflow-hidden ${
-                                 isActive 
-                                   ? 'bg-indigo-50 border-2 border-indigo-500 shadow-sm' 
-                                   : 'bg-slate-50 border border-slate-200 hover:bg-white hover:shadow-md hover:border-indigo-300'
-                               }`}
-                             >
-                               {isActive && (
-                                 <div className="absolute top-0 right-0 bg-indigo-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-bl-lg">
-                                   SELECIONADA
-                                 </div>
-                               )}
-                               <span className={`text-2xl mb-1 transition-transform ${isActive ? 'scale-125' : 'group-hover:scale-110'}`}>{exp.emoji}</span>
-                               <span className={`text-[10px] font-bold uppercase tracking-tight ${isActive ? 'text-indigo-700' : 'text-slate-500'}`}>{exp.label}</span>
-                             </button>
-                           );
-                        })}
+                      <div className="flex bg-slate-100 p-1.5 rounded-xl mb-4">
+                        <button
+                          onClick={() => {
+                            setActiveTab('expressoes');
+                            setActiveAction(null);
+                          }}
+                          className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'expressoes' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                        >
+                          Expressões
+                        </button>
+                        <button
+                          onClick={() => setActiveTab('acoes')}
+                          className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'acoes' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                        >
+                          Ações
+                        </button>
                       </div>
 
-                      {activeExpression === 'falando' && (
+                      {activeTab === 'expressoes' && (
+                        <div className="grid grid-cols-4 gap-2">
+                          {EXPRESSIONS.map((exp) => {
+                             const isActive = activeExpression === exp.id;
+                             return (
+                               <button 
+                                 key={exp.id} 
+                                 onClick={() => setActiveExpression(exp.id)}
+                                 className={`relative aspect-square flex flex-col items-center justify-center rounded-xl transition-all group overflow-hidden ${
+                                   isActive 
+                                     ? 'bg-indigo-50 border-2 border-indigo-500 shadow-sm' 
+                                     : 'bg-slate-50 border border-slate-200 hover:bg-white hover:shadow-md hover:border-indigo-300'
+                                 }`}
+                               >
+                                 {isActive && (
+                                   <div className="absolute top-0 right-0 bg-indigo-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-bl-lg">
+                                     SELECIONADA
+                                   </div>
+                                 )}
+                                 <span className={`text-2xl mb-1 transition-transform ${isActive ? 'scale-125' : 'group-hover:scale-110'}`}>{exp.emoji}</span>
+                                 <span className={`text-[10px] font-bold uppercase tracking-tight ${isActive ? 'text-indigo-700' : 'text-slate-500'}`}>{exp.label}</span>
+                               </button>
+                             );
+                          })}
+                        </div>
+                      )}
+
+                      {activeTab === 'acoes' && (
+                        <div className="grid grid-cols-3 gap-2 overflow-y-auto max-h-[300px] pr-2">
+                          {ACTIONS.map((action) => {
+                             const isActive = activeAction === action.id;
+                             return (
+                               <button 
+                                 key={action.id} 
+                                 onClick={() => setActiveAction(action.id)}
+                                 className={`relative flex flex-col items-center justify-center p-3 rounded-xl transition-all group overflow-hidden ${
+                                   isActive 
+                                     ? 'bg-indigo-50 border-2 border-indigo-500 shadow-sm' 
+                                     : 'bg-slate-50 border border-slate-200 hover:bg-white hover:shadow-md hover:border-indigo-300'
+                                 }`}
+                               >
+                                 {isActive && (
+                                   <div className="absolute top-0 right-0 bg-indigo-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-bl-lg">
+                                     ATIVA
+                                   </div>
+                                 )}
+                                 <span className={`text-2xl mb-2 transition-transform ${isActive ? 'scale-125' : 'group-hover:scale-110'}`}>{action.emoji}</span>
+                                 <span className={`text-[10px] font-bold text-center leading-tight ${isActive ? 'text-indigo-700' : 'text-slate-500'}`}>{action.label}</span>
+                               </button>
+                             );
+                          })}
+                        </div>
+                      )}
+
+                      {activeTab === 'expressoes' && activeExpression === 'falando' && (
                         <motion.div 
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}

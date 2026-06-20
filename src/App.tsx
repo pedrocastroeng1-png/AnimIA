@@ -18,7 +18,7 @@ import { AppState, WorkspaceView, Character } from './types';
 
 export default function App() {
   const [appState, setAppState] = useState<AppState>('home');
-  const [workspaceView, setWorkspaceView] = useState<WorkspaceView>('director');
+  const [workspaceView, setWorkspaceView] = useState<WorkspaceView>('scenes');
   const [activeCharacterId, setActiveCharacterId] = useState<string | null>(null);
   
   const store = useStore();
@@ -27,7 +27,7 @@ export default function App() {
 
   const handleSelectCharacter = (char: Character) => {
      setActiveCharacterId(char.id);
-     setWorkspaceView('director');
+     setWorkspaceView('scenes');
      setAppState('workspace');
   };
 
@@ -69,7 +69,7 @@ export default function App() {
            onFinish={(char) => {
              store.addCharacter(char);
              setActiveCharacterId(char.id);
-             setWorkspaceView('director');
+             setWorkspaceView('scenes');
              setAppState('workspace');
            }}
            onCancel={() => setAppState('home')}
