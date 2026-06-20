@@ -93,7 +93,7 @@ async function startServer() {
         console.error("Audio generation error:", audioErr);
         // We will continue even if audio fails, the frontend can fallback to browser TTS
       }
-
+      
       res.json({
         success: true,
         data: {
@@ -107,6 +107,42 @@ async function startServer() {
     }
   });
 
+  app.post("/api/tts", async (req, res) => {
+    try {
+      const { text, voiceName } = req.body;
+      
+      let geminiVoiceName = "Charon";
+      if (!voiceName) {
+        geminiVoiceName = "Charon";
+      } else if (voiceName.includes("Feminina")) {
+        geminiVoiceName = voiceName.includes("Jovem") ? "Kore" : "Aoede";
+      } else if (voiceName.includes("Jovem Masculina")) {
+        geminiVoiceName = "Puck";
+      } else if (voiceName.includes("Narrador")) {
+        geminiVoiceName = "Fenrir";
+      }
+
+      const audioResponse = await ai.models.generateContent({
+        model: "gemini-3.1-flash-tts-preview",
+        contents: [{ parts: [{ text: text || "Olá." }] }],
+        config: {
+          responseModalities: [Modality.AUDIO],
+          speechConfig: {
+              voiceConfig: {
+                prebuiltVoiceConfig: { voiceName: geminiVoiceName },
+              },
+          },
+        },
+      });
+      
+      const base64Audio = audioResponse.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+      
+      res.json({ success: true, audioBase64: base64Audio });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, error: "Failed to generate TTS" });
+    }
+  });
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {

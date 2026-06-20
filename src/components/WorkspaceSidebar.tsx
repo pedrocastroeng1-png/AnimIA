@@ -1,4 +1,4 @@
-import { Clapperboard, Image, Package, Truck, FileText, Wand2, FolderOpen, Settings } from 'lucide-react';
+import { Clapperboard, Image, Package, Truck, Wand2, FolderOpen, Settings, Mic } from 'lucide-react';
 import { WorkspaceView } from '../types';
 
 interface WorkspaceSidebarProps {
@@ -8,11 +8,11 @@ interface WorkspaceSidebarProps {
 
 const MENU_ITEMS = [
   { id: 'scenes', label: 'Gerador de Cenas', icon: Clapperboard },
+  { id: 'director', label: 'IA Diretora', icon: Wand2 },
   { id: 'backgrounds', label: 'Cenários', icon: Image },
   { id: 'products', label: 'Produtos', icon: Package },
   { id: 'vehicles', label: 'Veículos', icon: Truck },
-  { id: 'scripts', label: 'Roteiros', icon: FileText },
-  { id: 'director', label: 'IA Diretora', icon: Wand2 },
+  { id: 'voices', label: 'Vozes', icon: Mic },
   { id: 'projects', label: 'Projetos', icon: FolderOpen },
 ];
 

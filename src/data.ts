@@ -22,49 +22,7 @@ export const MOCK_TEMPLATES: Template[] = [
   { id: 't_3', name: 'Campanha de Aniversário', category: 'Comemoração', description: 'Agradecimento e brinde de aniversário da loja.' },
 ];
 
-export const MOCK_CHARACTERS: Character[] = [
-  {
-    id: 'char_1',
-    name: 'Mascote Builder',
-    category: 'Mascote',
-    imageUrl: 'https://images.unsplash.com/photo-1579548122080-c35fd6820ceb?auto=format&fit=crop&q=80&w=400&h=400',
-    defaultVoice: 'Masculina Animada',
-    defaultExpression: 'Feliz',
-    speakingStyle: 'Energético',
-    favoriteBehaviors: ['Mostrar produto', 'Acenar'],
-    frequentObjects: ['Capacete', 'Prancheta'],
-    favoriteScenes: ['Chegada de Material'],
-  },
-  {
-    id: 'char_2',
-    name: 'Avatar Executiva',
-    category: 'Corporativo',
-    imageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400&h=400',
-    defaultVoice: 'Feminina Profissional',
-    defaultExpression: 'Confiante',
-    speakingStyle: 'Claro e objetivo',
-    favoriteBehaviors: ['Falar para câmera', 'Gestos suaves'],
-    frequentObjects: ['Tablet', 'Gráficos'],
-    favoriteScenes: ['Mensagem Corporativa'],
-  },
-  {
-    id: 'char_3',
-    name: 'Menino 3D',
-    category: 'Infantil',
-    imageUrl: 'https://images.unsplash.com/photo-1622668583486-fb10237da09f?auto=format&fit=crop&q=80&w=400&h=400',
-    defaultVoice: 'Infantil Divertida',
-    defaultExpression: 'Surpreso',
-    speakingStyle: 'Rápido',
-    favoriteBehaviors: ['Comemorar', 'Apontar para o lado'],
-  },
-  {
-    id: 'char_4',
-    name: 'Logo Animada',
-    category: 'Logotipo',
-    imageUrl: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=400&h=400',
-    speakingStyle: 'Institucional',
-  },
-];
+export const MOCK_CHARACTERS: Character[] = [];
 
 export const MOCK_BACKGROUNDS: Background[] = [
   {
@@ -87,29 +45,4 @@ export const MOCK_BACKGROUNDS: Background[] = [
   },
 ];
 
-export const MOCK_HISTORY: VideoHistory[] = [
-  {
-    id: 'vid_1',
-    title: 'Promoção de Verão',
-    characterId: 'char_1',
-    backgroundId: 'bg_1',
-    script: 'Olá, pessoal! Temos uma super promoção esta semana.',
-    voice: 'Masculina',
-    format: 'Reels',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1611162616475-46b635cb6868?auto=format&fit=crop&q=80&w=600&h=400',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    status: 'completed',
-  },
-  {
-    id: 'vid_2',
-    title: 'Apresentação Corporativa',
-    characterId: 'char_2',
-    backgroundId: 'bg_2',
-    script: 'Bem-vindos a mais um trimestre de sucesso em nossa empresa.',
-    voice: 'Corporativa',
-    format: 'Horizontal',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=600&h=400',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    status: 'completed',
-  },
-];
+export const MOCK_HISTORY: VideoHistory[] = [];

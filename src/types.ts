@@ -1,5 +1,5 @@
 export type AppState = 'home' | 'create_mascot' | 'workspace';
-export type WorkspaceView = 'scenes' | 'backgrounds' | 'products' | 'vehicles' | 'scripts' | 'director' | 'projects' | 'settings';
+export type WorkspaceView = 'scenes' | 'backgrounds' | 'products' | 'vehicles' | 'scripts' | 'director' | 'projects' | 'settings' | 'voices';
 
 export interface Character {
   id: string;
