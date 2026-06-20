@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles, Image, User, Layers, Video, FileText, Download, Settings, Zap, Star, Crown, Cpu } from 'lucide-react';
+import { Sparkles, Image, User, Layers, Video, FileText, Download, Settings, Zap, Star, Crown, Cpu, X, Dna } from 'lucide-react';
 import { Character } from '../../types';
 import { VIDEO_PROVIDERS, VOICE_PROVIDERS, ProviderTier } from '../../lib/providers';
 
@@ -27,6 +27,7 @@ const ACTIONS = [
 export function SceneGenerator({ activeCharacter, store }: SceneGeneratorProps) {
   const [sceneDescription, setSceneDescription] = useState('Frente de loja de material de construção');
   const [selectedAction, setSelectedAction] = useState('acenar');
+  const [directorNotes, setDirectorNotes] = useState('Animação alegre e chamativa, com a câmera se aproximando lentamente do personagem.');
   const [speechText, setSpeechText] = useState('Olá! Seja bem-vindo ao Armazém.');
   
   // Multi-Provider Settings
@@ -37,6 +38,8 @@ export function SceneGenerator({ activeCharacter, store }: SceneGeneratorProps) 
 
   const [generatedPrompt, setGeneratedPrompt] = useState<string | null>(null);
 
+  const [showDnaModal, setShowDnaModal] = useState(false);
+
   const bestProvider = generationMode === 'simples' 
     ? VIDEO_PROVIDERS.find(p => p.tier === selectedTier)?.name || 'Motor Inteligente'
     : VIDEO_PROVIDERS.find(p => p.id === advancedProvider)?.name || 'Motor Customizado';
@@ -45,6 +48,19 @@ export function SceneGenerator({ activeCharacter, store }: SceneGeneratorProps) 
     ? VOICE_PROVIDERS.find(p => p.tier === selectedTier)?.name || 'Motor Inteligente'
     : VOICE_PROVIDERS.find(p => p.id === advancedVoiceProvider)?.name || 'Motor Customizado';
 
+  // Fallbacks para o DNA
+  const dna = {
+    physicalDescription: activeCharacter.physicalDescription || "Aparência padrão baseada na referência visual.",
+    facialDescription: activeCharacter.facialDescription || "Rosto expressivo e amigável.",
+    clothing: activeCharacter.clothing || "Roupas características da sua profissão.",
+    accessories: activeCharacter.accessories || "Acessórios de trabalho.",
+    mainColors: activeCharacter.mainColors || "Cores vibrantes que combinam com a marca.",
+    personality: activeCharacter.personality || "Carismático e proativo.",
+    profession: activeCharacter.profession || "Apresentador da marca.",
+    voiceTone: activeCharacter.voiceTone || activeCharacter.defaultVoice || "Voz clara e animada.",
+    catchphrase: activeCharacter.catchphrase || "Sempre pronto para ajudar!"
+  };
+
   const generatePrompt = () => {
     const actionLabel = ACTIONS.find(a => a.id === selectedAction)?.label || selectedAction;
     
@@ -52,18 +68,28 @@ export function SceneGenerator({ activeCharacter, store }: SceneGeneratorProps) 
 [MOTOR DE INFERÊNCIA VÍDEO: ${bestProvider.toUpperCase()}]
 [MOTOR DE INFERÊNCIA VOZ: ${bestVoiceProvider.toUpperCase()}]
 
-==== INFORMAÇÕES DO ATOR / MASCOTE ====
+==== DNA DO MASCOTE (MANTER CONSISTÊNCIA) ====
 Personagem: ${activeCharacter.name}
 Categoria/Tipo: ${activeCharacter.category || 'Mascote 3D'}
+Físico: ${dna.physicalDescription}
+Rosto/Expressão base: ${dna.facialDescription}
+Vestimenta: ${dna.clothing}
+Acessórios: ${dna.accessories}
+Cores Principais: ${dna.mainColors}
+Personalidade: ${dna.personality}
+Profissão/Papel: ${dna.profession}
+Tom de Voz: ${dna.voiceTone}
+Bordão: "${dna.catchphrase}"
 Referência Visual: [Anexar a imagem base do mascote para consistência de identidade]
 
 ==== CENÁRIO (BACKGROUND) ====
 Ambiente: ${sceneDescription}
 Iluminação: Iluminação natural e agradável, estilo propaganda publicitária.
 
-==== AÇÃO & MOVIMENTO ====
+==== AÇÃO & DIREÇÃO DE CÂMERA ====
 Comportamento principal: ${actionLabel}. 
-Direção: O mascote executa o movimento de forma fluida, mantendo contato visual com o espectador (câmera). Estilo de animação expressiva e carismática.
+Diretor de Cena: ${directorNotes}
+Direção: O mascote executa o movimento de forma fluida, mantendo contato visual com o espectador (câmera). Estilo de animação expressiva e carismática de acordo com sua personalidade (${dna.personality}).
 
 ==== FALA & ÁUDIO (LIP-SYNC) ====
 O mascote deve gesticular e articular os lábios em perfeita sincronia com a seguinte fala:
@@ -138,11 +164,18 @@ Estilo de Animação 3D moderno (estilo Pixar/Disney), renderização de alta qu
               <div className="w-16 h-16 bg-white rounded-xl border border-slate-200 p-2 shrink-0">
                 <img src={activeCharacter.imageUrl} alt={activeCharacter.name} className="w-full h-full object-contain" />
               </div>
-              <div>
+              <div className="flex-1">
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Ator Principal</p>
                 <h3 className="font-bold text-slate-800 text-lg">{activeCharacter.name}</h3>
                 <p className="text-sm text-slate-500">{activeCharacter.category || "Mascote 3D"}</p>
               </div>
+              <button 
+                onClick={() => setShowDnaModal(true)}
+                className="w-10 h-10 flex items-center justify-center bg-indigo-50 text-indigo-600 rounded-full hover:bg-indigo-100 transition-colors"
+                title="Ver DNA do Mascote"
+              >
+                <Dna className="w-5 h-5" />
+              </button>
             </div>
 
             {/* Background Control */}
@@ -182,16 +215,42 @@ Estilo de Animação 3D moderno (estilo Pixar/Disney), renderização de alta qu
                </div>
             </div>
 
-            {/* Subtitle/Text Control */}
+            {/* Director Notes / Script Control */}
+            <div>
+               <div className="flex items-center justify-between mb-3">
+                 <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                    <Video className="w-4 h-4" /> 3. Campo de Roteiro
+                 </h3>
+                 <button 
+                   onClick={() => {
+                     setSceneDescription("Loja de materiais de construção cheia, iluminação solar diurna.");
+                     setDirectorNotes("A câmera começa em close no mascote e afasta (dolly out) revelando o cenário enquanto ele acena de forma animada.");
+                     setSpeechText("Olá, construtores! Confiram as super ofertas do Armazém preparadas especialmente para você!");
+                   }}
+                   className="text-[10px] font-bold bg-indigo-100 text-indigo-700 px-2 py-1 rounded hover:bg-indigo-200 flex items-center gap-1 transition-colors"
+                 >
+                   <Sparkles className="w-3 h-3" /> IA Diretora
+                 </button>
+               </div>
+               <textarea 
+                  rows={2} 
+                  value={directorNotes}
+                  onChange={(e) => setDirectorNotes(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 resize-none text-sm placeholder:text-slate-400" 
+                  placeholder="Instruções de câmera, iluminação ou detalhes da animação..."
+               />
+            </div>
+
+            {/* Speech Control */}
             <div>
                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" /> 3. Fala (Roteiro)
+                  <Sparkles className="w-4 h-4" /> 4. Campo de Fala
                </h3>
                <textarea 
-                  rows={4} 
+                  rows={2} 
                   value={speechText}
                   onChange={(e) => setSpeechText(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 resize-none" 
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium text-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 resize-none text-sm placeholder:text-slate-400" 
                   placeholder="Escreva a fala do personagem para esta cena..."
                />
             </div>
@@ -283,6 +342,58 @@ Estilo de Animação 3D moderno (estilo Pixar/Disney), renderização de alta qu
             </button>
          </div>
       </div>
+
+      {showDnaModal && (
+        <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+              <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
+                <Dna className="w-5 h-5 text-indigo-600" /> DNA Persistente do Mascote
+              </h2>
+              <button 
+                onClick={() => setShowDnaModal(false)}
+                className="w-8 h-8 flex items-center justify-center bg-white rounded-full text-slate-400 hover:text-slate-600 shadow-sm"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto space-y-5">
+              <div className="bg-indigo-50 text-indigo-700 text-sm font-medium p-4 rounded-xl flex items-start gap-3">
+                <Sparkles className="w-5 h-5 shrink-0 mt-0.5" />
+                <p>Estes atributos são injetados automaticamente em todas as cenas geradas. Eles garantem que seu mascote seja consistente entre diferentes geradores de vídeo.</p>
+              </div>
+
+              <div className="space-y-4 text-sm font-medium">
+                <div>
+                  <span className="text-slate-400 font-bold block mb-1">🎭 Personagem / Papel</span>
+                  <p className="text-slate-800"><strong>{activeCharacter.name}</strong> • {activeCharacter.category || 'Mascote 3D'}</p>
+                  <p className="text-slate-600">{dna.profession}</p>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-bold block mb-1">👀 Físico e Expressão</span>
+                  <p className="text-slate-800"><strong>Físico:</strong> {dna.physicalDescription}</p>
+                  <p className="text-slate-800"><strong>Rosto:</strong> {dna.facialDescription}</p>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-bold block mb-1">👕 Estilo</span>
+                  <p className="text-slate-800"><strong>Roupa:</strong> {dna.clothing}</p>
+                  <p className="text-slate-800"><strong>Cores:</strong> {dna.mainColors}</p>
+                  <p className="text-slate-800"><strong>Acessórios:</strong> {dna.accessories}</p>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-bold block mb-1">🧠 Identidade Psicológica</span>
+                  <p className="text-slate-800"><strong>Personalidade:</strong> {dna.personality}</p>
+                  <p className="text-slate-800"><strong>Tom de Voz:</strong> {dna.voiceTone}</p>
+                  <p className="text-slate-800"><strong>Bordão:</strong> "{dna.catchphrase}"</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

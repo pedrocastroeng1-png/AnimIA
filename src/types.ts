@@ -6,6 +6,19 @@ export interface Character {
   name: string;
   category: string;
   imageUrl: string;
+  
+  // Mascot DNA
+  physicalDescription?: string;
+  facialDescription?: string;
+  clothing?: string;
+  accessories?: string;
+  mainColors?: string;
+  personality?: string;
+  profession?: string;
+  voiceTone?: string;
+  catchphrase?: string;
+
+  // Additional data
   defaultVoice?: string;
   defaultExpression?: string;
   speakingStyle?: string;
@@ -13,7 +26,6 @@ export interface Character {
   frequentObjects?: string[];
   favoriteScenes?: string[];
   description?: string;
-  personality?: string;
 }
 
 export interface Background {
