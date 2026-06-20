@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Wand2, Camera, Image as ImageIcon, X, CheckCircle2, RotateCcw, Edit3, ArrowRight, BrainCircuit, Sparkles } from 'lucide-react';
+import { Wand2, Camera, Image as ImageIcon, X, CheckCircle2, RotateCcw, Edit3, ArrowRight, BrainCircuit, Sparkles, Play, Loader2 } from 'lucide-react';
 import { Character } from '../types';
 
 interface CreateMascotProps {
@@ -22,7 +22,12 @@ const EXPRESSIONS = [
 
 export function CreateMascot({ onFinish, onCancel }: CreateMascotProps) {
   const [step, setStep] = useState<Step>('input');
+  const [activeExpression, setActiveExpression] = useState('feliz');
   
+  // Audio Simulator State
+  const [speakText, setSpeakText] = useState("");
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
   // Input State
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -58,6 +63,13 @@ export function CreateMascot({ onFinish, onCancel }: CreateMascotProps) {
   const handleRemoveImage = (e: React.MouseEvent) => {
     e.stopPropagation();
     setMainImage(null);
+  };
+
+  const handleTestFala = () => {
+    setIsSpeaking(true);
+    setTimeout(() => {
+      setIsSpeaking(false);
+    }, 3000); // simulate 3 sec audio
   };
 
   const isFormValid = name.trim() !== '' && (mainImage !== null || description.trim() !== '');
@@ -274,27 +286,105 @@ export function CreateMascot({ onFinish, onCancel }: CreateMascotProps) {
                   {/* Left Column: Visuals */}
                   <div className="md:col-span-2 space-y-6">
                     <div className="aspect-square bg-slate-100 rounded-3xl overflow-hidden border-2 border-slate-200 shadow-inner relative">
-                       <img 
-                         src={mainImage?.url || 'https://images.unsplash.com/photo-1579548122080-c35fd6820ceb?auto=format&fit=crop&q=80&w=600&h=600'} 
-                         alt={name} 
-                         className="w-full h-full object-cover mix-blend-multiply" 
-                       />
-                       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-6 pt-12">
+                       <AnimatePresence mode="wait">
+                         <motion.img 
+                           key={activeExpression}
+                           initial={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
+                           animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                           exit={{ opacity: 0, scale: 1.05, filter: 'blur(4px)' }}
+                           transition={{ duration: 0.3 }}
+                           src={mainImage?.url || 'https://images.unsplash.com/photo-1579548122080-c35fd6820ceb?auto=format&fit=crop&q=80&w=600&h=600'} 
+                           alt={`${name} - ${activeExpression}`} 
+                           className={`absolute inset-0 w-full h-full object-cover mix-blend-multiply ${
+                             activeExpression === 'surpreso' ? 'scale-110' : 
+                             activeExpression === 'pensativo' ? 'brightness-75 contrast-125 sepia-[.3]' :
+                             activeExpression === 'feliz' ? 'brightness-110 saturate-125' :
+                             activeExpression === 'acenando' ? 'rotate-[-5deg] scale-105 origin-bottom' :
+                             activeExpression === 'falando' ? (isSpeaking ? 'scale-[1.05] brightness-110' : 'scale-[1.02]') :
+                             activeExpression === 'comemorando' ? 'hue-rotate-15 scale-110' :
+                             activeExpression === 'apontando' ? 'translate-x-2' : ''
+                           } transition-transform duration-500`} 
+                         />
+                       </AnimatePresence>
+                       <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-6 pt-12 z-10">
                           <h3 className="text-2xl font-black text-white">{name}</h3>
-                          <p className="text-white/80 font-medium text-sm">{generatedData?.category}</p>
+                          <p className="text-white/80 font-medium text-sm flex items-center gap-2">
+                            {generatedData?.category}
+                            <span className="w-1.5 h-1.5 rounded-full bg-white/50"></span>
+                            <span className="capitalize">{EXPRESSIONS.find(e => e.id === activeExpression)?.label}</span>
+                          </p>
                        </div>
+                       
+                       <motion.div
+                         key={`emoji-${activeExpression}`}
+                         initial={{ opacity: 0, y: 20, scale: 0 }}
+                         animate={{ opacity: 1, y: 0, scale: 1 }}
+                         className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm shadow-lg rounded-full w-12 h-12 flex items-center justify-center text-2xl border border-slate-200/50 z-10"
+                       >
+                         {EXPRESSIONS.find(e => e.id === activeExpression)?.emoji}
+                       </motion.div>
                     </div>
 
                     <div>
                       <h4 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3">Expressões Geradas</h4>
                       <div className="grid grid-cols-4 gap-2">
-                        {EXPRESSIONS.map((exp, i) => (
-                           <div key={exp.id} className="aspect-square bg-slate-50 border border-slate-200 rounded-xl flex flex-col items-center justify-center hover:bg-white hover:shadow-md hover:border-indigo-300 transition-all cursor-default group">
-                              <span className="text-2xl mb-1 group-hover:scale-125 transition-transform">{exp.emoji}</span>
-                              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">{exp.label}</span>
-                           </div>
-                        ))}
+                        {EXPRESSIONS.map((exp, i) => {
+                           const isActive = activeExpression === exp.id;
+                           return (
+                             <button 
+                               key={exp.id} 
+                               onClick={() => setActiveExpression(exp.id)}
+                               className={`relative aspect-square flex flex-col items-center justify-center rounded-xl transition-all group overflow-hidden ${
+                                 isActive 
+                                   ? 'bg-indigo-50 border-2 border-indigo-500 shadow-sm' 
+                                   : 'bg-slate-50 border border-slate-200 hover:bg-white hover:shadow-md hover:border-indigo-300'
+                               }`}
+                             >
+                               {isActive && (
+                                 <div className="absolute top-0 right-0 bg-indigo-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-bl-lg">
+                                   SELECIONADA
+                                 </div>
+                               )}
+                               <span className={`text-2xl mb-1 transition-transform ${isActive ? 'scale-125' : 'group-hover:scale-110'}`}>{exp.emoji}</span>
+                               <span className={`text-[10px] font-bold uppercase tracking-tight ${isActive ? 'text-indigo-700' : 'text-slate-500'}`}>{exp.label}</span>
+                             </button>
+                           );
+                        })}
                       </div>
+
+                      {activeExpression === 'falando' && (
+                        <motion.div 
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          className="bg-indigo-50 border border-indigo-100 p-5 rounded-2xl overflow-hidden mt-4"
+                        >
+                           <h4 className="text-sm font-bold text-slate-800 mb-3 hover:text-indigo-700">Teste de Voz e Animação</h4>
+                           <input 
+                             type="text" 
+                             value={speakText}
+                             onChange={(e) => setSpeakText(e.target.value)}
+                             placeholder="Ex: Olá! Eu sou seu novo mascote virtual." 
+                             className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 mb-3 placeholder:font-medium placeholder:text-slate-400"
+                           />
+                           <button 
+                             onClick={handleTestFala}
+                             disabled={isSpeaking}
+                             className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2 transition-colors"
+                           >
+                              {isSpeaking ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                                  Teste em andamento...
+                                </>
+                              ) : (
+                                <>
+                                  <Play className="w-4 h-4 fill-current text-white" />
+                                  Testar Fala
+                                </>
+                              )}
+                           </button>
+                        </motion.div>
+                      )}
                     </div>
                   </div>
 
